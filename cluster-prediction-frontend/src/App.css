@@ -1,0 +1,144 @@
+/* Default style for select element when placeholder is selected */
+select.placeholder {
+  color: #999; /* Grey color for placeholder */
+}
+
+/* When a valid option is selected, the text will appear black */
+select.valid {
+  color: black; /* Black for valid options */
+}
+
+/* Ensure that the options in the dropdown are black */
+select option {
+  color: black; /* Black for all options in the dropdown */
+}
+
+/* General styling for the page */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f4f4f4;
+  height: 100vh;
+  overflow-y: auto; /* Enable full-page scrolling */
+}
+
+.app-container {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start; /* Align at the top to allow full-page scrolling */
+  padding: 20px;
+  min-height: 100vh;
+}
+
+.form-container {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  max-width: 400px;
+  width: 100%;
+  margin-bottom: 20px; /* Adding margin for spacing between form and page bottom */
+}
+
+.current-medications-label {
+  font-weight: bold;
+}
+
+.medication-label {
+  font-weight: normal;
+}
+
+/* Add padding and margin specifically to the last medication option (None) */
+.last-medication-option {
+  padding-bottom: 10px; 
+}
+
+h2 {
+  text-align: center;
+  margin-bottom: 10px; /* Reduce space for smaller screens */
+}
+
+.input-group {
+  margin-bottom: 10px; /* Reduce space between form fields */
+}
+
+.input-group label {
+  display: block;
+  margin-bottom: 3px;
+  font-weight: bold;
+}
+
+input[type="number"],
+select {
+  width: 100%;
+  padding: 8px; /* Reduce padding to fit within constraints */
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 14px; /* Slightly smaller font */
+  box-sizing: border-box;
+  height: 40px; /* Ensure consistent height for both input and select */
+}
+
+/* Placeholder color for input fields */
+input::placeholder {
+  color: #999; /* Grey color for input placeholders */
+}
+
+.submit-button {
+  width: 100%;
+  padding: 8px; /* Reduced padding */
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.submit-button:hover {
+  background-color: #0056b3;
+}
+
+.error-message {
+  margin-top: 10px;
+  color: red;
+}
+
+.result-container {
+  margin-top: 15px;
+  background-color: #e9f7ef;
+  padding: 15px;
+  border-radius: 5px;
+  text-align: center;
+}
+
+.result-container h3 {
+  margin-bottom: 10px;
+}
+
+.result-container div {
+  margin-bottom: 5px;
+}
+
+/* Responsive behavior for smaller screens */
+@media (max-width: 768px) {
+  .form-container {
+    padding: 15px; /* Further reduce padding for smaller screens */
+  }
+
+  input[type="number"],
+  select {
+    font-size: 13px;
+    height: 35px;
+  }
+
+  .submit-button {
+    font-size: 13px;
+  }
+}
