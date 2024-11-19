@@ -6,7 +6,7 @@ import joblib
 import pandas as pd
 
 # Create Flask app
-app = Flask(__name__)
+app = Flask(__name__, static_folder="build")
 CORS(app)  # Enable CORS for all routes
 
 # Load model
@@ -15,7 +15,7 @@ if not os.path.isfile(MODEL_PATH):
     raise FileNotFoundError(f"Model file {MODEL_PATH} does not exist.")
 model = joblib.load(MODEL_PATH)
 
-@app.route('/predict', methods=['POST', 'GET'])
+@app.route('/predict', methods=['POST'])
 def predict():
     try:
         # Get JSON data from request
@@ -74,6 +74,16 @@ def predict():
         'probabilities': cluster_prob_rounded
     }
     return jsonify(output)
+
+# Serve React static files
+@app.route("/", defaults={"path": ""})
+@app.route("/<path:path>")
+def serve_react(path):
+    if path != "" and os.path.exists(os.path.join(app.static_folder, path)):
+        return send_from_directory(app.static_folder, path)
+    else:
+        return send_from_directory(app.static_folder, "index.html")
+
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
