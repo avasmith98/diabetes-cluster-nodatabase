@@ -13,13 +13,8 @@ app = Flask(__name__, static_folder="build")
 CORS(app)  # Enable CORS for all routes
 
 # Set up PostgreSQL database URI
-database_url = os.environ.get('DATABASE_URL')
-
-# Fix the URL for SQLAlchemy compatibility
-if database_url and database_url.startswith("postgres://"):
-    database_url = database_url.replace("postgres://", "postgresql://", 1)
-
-app.config['SQLALCHEMY_DATABASE_URI'] = database_url
+# Configure the database
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL').replace("postgres://", "postgresql://", 1)
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # Initialize the database
@@ -36,6 +31,11 @@ class PredictionData(db.Model):
     medications = db.Column(db.JSON, nullable=False)  # Store medications as JSON
     cluster_label = db.Column(db.String(50), nullable=False)
     probabilities = db.Column(db.JSON, nullable=False)
+
+class MedicationChange(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    is_management_changed = db.Column(db.Boolean, nullable=False)
+    medications = db.Column(db.String(255), nullable=True)
 
 #Initialize Flask-Migrate
 migrate = Migrate(app, db)
@@ -120,6 +120,25 @@ def predict():
         'probabilities': cluster_prob_rounded
     }
     return jsonify(output)
+    
+@app.route('/submit_medications', methods=['POST'])
+def submit_medications():
+    try:
+        data = request.get_json()
+        is_management_changed = data['isManagementChanged']
+        medications = data['medications']
+
+        # Save medication data to the database
+        medication_change = MedicationChange(
+            is_management_changed=is_management_changed == 'yes',
+            medications=str(medications)
+        )
+        db.session.add(medication_change)
+        db.session.commit()
+
+        return jsonify({'message': 'Medication changes saved successfully.'}), 200
+    except KeyError:
+        return jsonify({'error': 'Invalid input data'}), 400
 
 # Serve React static files
 @app.route("/", defaults={"path": ""})
@@ -149,6 +168,8 @@ def get_data():
     ]
     return jsonify(results)
 
+with app.app_context():
+    db.create_all()
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
