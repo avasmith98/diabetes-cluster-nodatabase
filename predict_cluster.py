@@ -1,19 +1,16 @@
-
 from flask import Flask, request, jsonify, send_from_directory
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
-from flask_cors import CORS 
+from flask_cors import CORS
 import os
 import joblib
 import pandas as pd
-
 
 # Create Flask app
 app = Flask(__name__, static_folder="build")
 CORS(app)  # Enable CORS for all routes
 
 # Set up PostgreSQL database URI
-# Configure the database
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL').replace("postgres://", "postgresql://", 1)
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
@@ -22,22 +19,26 @@ db = SQLAlchemy(app)
 
 class PredictionData(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.String(50), unique=True, nullable=False)
     gad = db.Column(db.Integer, nullable=False)
     hba1c = db.Column(db.Float, nullable=False)
     bmi = db.Column(db.Float, nullable=False)
     age = db.Column(db.Integer, nullable=False)
     cpeptide = db.Column(db.Float, nullable=False)
+    cpeptide_unit = db.Column(db.String(10), nullable=False)
     glucose = db.Column(db.Float, nullable=False)
-    medications = db.Column(db.JSON, nullable=False)  # Store medications as JSON
+    glucose_unit = db.Column(db.String(10), nullable=False)
+    medications = db.Column(db.JSON, nullable=False)
     cluster_label = db.Column(db.String(50), nullable=False)
     probabilities = db.Column(db.JSON, nullable=False)
 
 class MedicationChange(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.String(50), db.ForeignKey('prediction_data.user_id'), nullable=False)
     is_management_changed = db.Column(db.Boolean, nullable=False)
-    medications = db.Column(db.String(255), nullable=True)
+    medications = db.Column(db.JSON, nullable=True)
 
-#Initialize Flask-Migrate
+# Initialize Flask-Migrate
 migrate = Migrate(app, db)
 
 # Load model
@@ -49,7 +50,7 @@ model = joblib.load(MODEL_PATH)
 @app.route('/predict', methods=['POST'])
 def predict():
     try:
-        # Get JSON data from request
+        # Retrieve data from the request
         data = request.get_json()
         gad = float(data['gad'])
         hba1c = float(data['hba1c'])
@@ -57,10 +58,23 @@ def predict():
         age = float(data['age'])
         cpeptide = float(data['cpeptide'])
         glucose = float(data['glucose'])
-    except (KeyError, ValueError):
-        return jsonify({'error': 'Invalid input data'}), 400
+        cpeptide_unit = data.get('cpeptide_unit')  # Retrieve C-peptide unit
+        glucose_unit = data.get('glucose_unit')  # Retrieve glucose unit
+        user_id = data.get('user_id')  # Use user_id from request
 
-    # Check input values are within required range
+        # Validate user_id
+        if not user_id:
+            return jsonify({'error': 'Missing user_id in request'}), 400
+
+        # Validate units
+        if cpeptide_unit not in ['nmol/L', 'ng/mL']:
+            return jsonify({'error': 'Invalid C-peptide unit. Must be nmol/L or ng/mL.'}), 400
+        if glucose_unit not in ['mmol/L', 'mg/dL']:
+            return jsonify({'error': 'Invalid glucose unit. Must be mmol/L or mg/dL.'}), 400
+    except (KeyError, ValueError):
+        return jsonify({'error': 'Invalid input data. Ensure all required fields are provided and correctly formatted.'}), 400
+
+    # Input validation for values within the required range
     if not ((gad == 1) or (gad == 0)):
         return jsonify({'error': 'GAD autoantibody value must be 0 (negative) or 1 (positive).'}), 400
     if not (4.7 <= hba1c <= 18.1):
@@ -74,11 +88,11 @@ def predict():
     if not (18 <= age <= 88):
         return jsonify({'error': 'Age must be between 18 and 88 years.'}), 400
 
-    # Approximate HOMA1
+    # Approximate HOMA1 using validated values
     homa1_b = (20 * 6 * cpeptide) / (glucose - 3.5)
     homa1_ir = (glucose * 6 * cpeptide) / 22.5
 
-    # Construct input to match training format
+    # Construct input to match model's training format
     x = pd.DataFrame({
         "gad": [gad],
         "a1c": [hba1c],
@@ -88,57 +102,85 @@ def predict():
         "homa1_cpeptide_ir": [homa1_ir]
     })
 
-    # Predict cluster
+    # Predict cluster and probabilities
     cluster = model.predict(x)[0]
     cluster_prob = model.predict_proba(x)[0]
-
-    # Round probabilities to 3 decimal places
     cluster_prob_rounded = [round(prob, 3) for prob in cluster_prob.tolist()]
-
-    # Translate cluster number to label
     cluster_dict = {0: "SAID", 1: "SIDD", 2: "SIRD", 3: "MOD", 4: "MARD"}
     cluster_label = cluster_dict[cluster]
 
     # Save prediction data to the database
     prediction_data = PredictionData(
+        user_id=user_id,
         gad=gad,
         hba1c=hba1c,
         bmi=bmi,
         age=age,
         cpeptide=cpeptide,
+        cpeptide_unit=cpeptide_unit,
         glucose=glucose,
-        medications=data.get('medications', {}),  # Default to empty dict if not provided
+        glucose_unit=glucose_unit,
+        medications=data.get('medications', {}),
         cluster_label=cluster_label,
         probabilities=cluster_prob_rounded,
     )
     db.session.add(prediction_data)
     db.session.commit()
 
-    # Return output
-    output = {
+    # Return output to the user
+    return jsonify({
         'cluster_label': cluster_label,
-        'probabilities': cluster_prob_rounded
-    }
-    return jsonify(output)
-    
+        'probabilities': cluster_prob_rounded,
+        'user_id': user_id
+    })
+
 @app.route('/submit_medications', methods=['POST'])
 def submit_medications():
     try:
         data = request.get_json()
+        user_id = data.get('user_id')
         is_management_changed = data['isManagementChanged']
         medications = data['medications']
 
+        if not user_id:
+            return jsonify({'error': 'Missing user_id in request'}), 400
+
         # Save medication data to the database
         medication_change = MedicationChange(
+            user_id=user_id,
             is_management_changed=is_management_changed == 'yes',
-            medications=str(medications)
+            medications=medications
         )
         db.session.add(medication_change)
         db.session.commit()
 
-        return jsonify({'message': 'Medication changes saved successfully.'}), 200
+        return jsonify({'message': 'Medications submitted successfully.'}), 200
     except KeyError:
         return jsonify({'error': 'Invalid input data'}), 400
+
+@app.route('/data', methods=['GET'])
+def get_data():
+    predictions = PredictionData.query.all()
+    results = []
+    for prediction in predictions:
+        medications = MedicationChange.query.filter_by(user_id=prediction.user_id).first()
+        results.append({
+            'user_id': prediction.user_id,
+            'gad': prediction.gad,
+            'hba1c': prediction.hba1c,
+            'bmi': prediction.bmi,
+            'age': prediction.age,
+            'cpeptide': prediction.cpeptide,
+            'cpeptide_unit': prediction.cpeptide_unit,
+            'glucose': prediction.glucose,
+            'glucose_unit': prediction.glucose_unit,
+            'medications': prediction.medications,
+            'cluster_label': prediction.cluster_label,
+            'probabilities': prediction.probabilities,
+            'management_changed': medications.is_management_changed if medications else None,
+            'future_medications': medications.medications if medications else None,
+        })
+    return jsonify(results)
 
 # Serve React static files
 @app.route("/", defaults={"path": ""})
@@ -148,29 +190,9 @@ def serve_react(path):
         return send_from_directory(app.static_folder, path)
     else:
         return send_from_directory(app.static_folder, "index.html")
-@app.route('/data', methods=['GET'])
-def get_data():
-    predictions = PredictionData.query.all()
-    results = [
-        {
-            'id': record.id,
-            'gad': record.gad,
-            'hba1c': record.hba1c,
-            'bmi': record.bmi,
-            'age': record.age,
-            'cpeptide': record.cpeptide,
-            'glucose': record.glucose,
-            'medications': record.medications,
-            'cluster_label': record.cluster_label,
-            'probabilities': record.probabilities,
-        }
-        for record in predictions
-    ]
-    return jsonify(results)
 
 with app.app_context():
     db.create_all()
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
-
