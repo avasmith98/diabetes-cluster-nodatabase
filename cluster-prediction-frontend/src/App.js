@@ -164,7 +164,85 @@ function App() {
               <option value="Negative">Negative</option>
             </select>
           </div>
-          {/* Other input fields */}
+          <div className="input-group">
+            <label>HbA1c (%):</label>
+            <input
+              type="number"
+              name="hba1c"
+              value={inputs.hba1c}
+              onChange={handleChange}
+              placeholder="HbA1c (%)"
+              required
+            />
+          </div>
+          <div className="input-group">
+            <label>BMI (kg/m²):</label>
+            <input
+              type="number"
+              name="bmi"
+              value={inputs.bmi}
+              onChange={handleChange}
+              placeholder="BMI (kg/m²)"
+              required
+            />
+          </div>
+          <div className="input-group">
+            <label>Age (Years):</label>
+            <input
+              type="number"
+              name="age"
+              value={inputs.age}
+              onChange={handleChange}
+              placeholder="Age (Years)"
+              required
+            />
+          </div>
+          <div className="input-group">
+            <label>C-peptide:</label>
+            <div>
+              <input
+                type="number"
+                name="cpeptide"
+                value={inputs.cpeptide}
+                onChange={handleChange}
+                placeholder="C-peptide"
+                required
+              />
+              <select
+                name="cpeptideUnit"
+                value={cpeptideUnit}
+                onChange={(e) => setCpeptideUnit(e.target.value)}
+                required
+              >
+                <option value="" disabled hidden>Select Unit</option>
+                <option value="nmol/L">nmol/L</option>
+                <option value="ng/mL">ng/mL</option>
+              </select>
+            </div>
+          </div>
+          <div className="input-group">
+            <label>Glucose:</label>
+            <div>
+              <input
+                type="number"
+                name="glucose"
+                value={inputs.glucose}
+                onChange={handleChange}
+                placeholder="Glucose"
+                required
+              />
+              <select
+                name="glucoseUnit"
+                value={glucoseUnit}
+                onChange={(e) => setGlucoseUnit(e.target.value)}
+                required
+              >
+                <option value="" disabled hidden>Select Unit</option>
+                <option value="mmol/L">mmol/L</option>
+                <option value="mg/dL">mg/dL</option>
+              </select>
+            </div>
+          </div>
           <button type="submit" className="submit-button">
             Predict and Submit to Database
           </button>
