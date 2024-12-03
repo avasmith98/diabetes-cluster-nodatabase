@@ -124,21 +124,33 @@ def predict():
 @app.route('/submit_medications', methods=['POST'])
 def submit_medications():
     try:
+        # Parse JSON data from the request
         data = request.get_json()
-        is_management_changed = data['isManagementChanged']
-        medications = data['medications']
 
-        # Save medication data to the database
+        # Extract data from the request
+        is_management_changed = data.get('isManagementChanged')
+        medications = data.get('medications')
+
+        # Check if the required fields are present
+        if is_management_changed is None or medications is None:
+            return jsonify({'error': 'Invalid input data. Fields "isManagementChanged" and "medications" are required.'}), 400
+
+        # Save medication change to the database
         medication_change = MedicationChange(
-            is_management_changed=is_management_changed == 'yes',
-            medications=str(medications)
+            is_management_changed=(is_management_changed == 'yes'),
+            medications=medications  # Assuming medications are being saved as JSON
         )
+
         db.session.add(medication_change)
         db.session.commit()
 
         return jsonify({'message': 'Medication changes saved successfully.'}), 200
-    except KeyError:
-        return jsonify({'error': 'Invalid input data'}), 400
+
+    except Exception as e:
+        # Log and return error if any exception occurs
+        print(f"Error saving medication change: {e}")
+        return jsonify({'error': 'An error occurred while saving medication changes.'}), 500
+
 
 # Serve React static files
 @app.route("/", defaults={"path": ""})
