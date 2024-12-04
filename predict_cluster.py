@@ -133,7 +133,7 @@ def submit_medications():
         data = request.get_json()
 
         # Extract data from the request
-        is_management_changed = data.get('isManagementChanged')
+        is_management_changed = bool(data.get('isManagementChanged'))
         medications = data.get('medications', {})
 
         # Check if the required fields are present

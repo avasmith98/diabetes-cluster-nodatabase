@@ -141,10 +141,10 @@ function App() {
           medications: futureMedications,
         });
   
-        setSubmissionStatus('Medications have been saved successfully.');
+        setSubmissionStatus('Saved successfully.');
       } catch (error) {
         console.error('Error:', error);
-        setSubmissionStatus('Failed to save medications. Please try again.');
+        setSubmissionStatus('Failed to submit. Please try again.');
       }
     }
   };
