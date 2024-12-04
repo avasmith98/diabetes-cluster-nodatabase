@@ -28,7 +28,7 @@ class PredictionData(db.Model):
     age = db.Column(db.Integer, nullable=False)
     cpeptide = db.Column(db.Float, nullable=False)
     glucose = db.Column(db.Float, nullable=False)
-    medications = db.Column(db.JSON, nullable=False)  # Store medications as JSON
+    medications = db.Column(db.String(255), nullable=False)  # Store medications as JSON
     cluster_label = db.Column(db.String(50), nullable=False)
     probabilities = db.Column(db.JSON, nullable=False)
 
@@ -57,6 +57,11 @@ def predict():
         age = float(data['age'])
         cpeptide = float(data['cpeptide'])
         glucose = float(data['glucose'])
+
+        #Extract medications from the request
+        medications = data.get('medications', {})
+        selected_medications = [med for med, selected in medications.items() if selected]
+
     except (KeyError, ValueError):
         return jsonify({'error': 'Invalid input data'}), 400
 
@@ -87,7 +92,7 @@ def predict():
         "homa1_cpeptide_b": [homa1_b],
         "homa1_cpeptide_ir": [homa1_ir]
     })
-
+    
     # Predict cluster
     cluster = model.predict(x)[0]
     cluster_prob = model.predict_proba(x)[0]
@@ -107,7 +112,7 @@ def predict():
         age=age,
         cpeptide=cpeptide,
         glucose=glucose,
-        medications=data.get('medications', {}),  # Default to empty dict if not provided
+        medications=selected_medications,  
         cluster_label=cluster_label,
         probabilities=cluster_prob_rounded,
     )
@@ -129,27 +134,30 @@ def submit_medications():
 
         # Extract data from the request
         is_management_changed = data.get('isManagementChanged')
-        medications = data.get('medications')
+        medications = data.get('medications', {})
+        
+        # Convert medications to a list of selected ones
+        selected_medications = [med for med, selected in medications.items() if selected]
 
         # Check if the required fields are present
-        if is_management_changed is None or medications is None:
-            return jsonify({'error': 'Invalid input data. Fields "isManagementChanged" and "medications" are required.'}), 400
+        if is_management_changed is None:
+            return jsonify({'error': 'Invalid input data. Fields "isManagementChanged" is required.'}), 400
 
         # Save medication change to the database
         medication_change = MedicationChange(
             is_management_changed=(is_management_changed == 'yes'),
-            medications=medications  # Assuming medications are being saved as JSON
+            medications=', '.join(selected_medications)
         )
 
         db.session.add(medication_change)
         db.session.commit()
 
-        return jsonify({'message': 'Medication changes saved successfully.'}), 200
+        return jsonify({'message': 'Medication changes submitted successfully.'}), 200
 
     except Exception as e:
         # Log and return error if any exception occurs
-        print(f"Error saving medication change: {e}")
-        return jsonify({'error': 'An error occurred while saving medication changes.'}), 500
+        print(f"Error: {e}")
+        return jsonify({'error': 'An error occurred while submitting changes.'}), 500
 
 
 # Serve React static files

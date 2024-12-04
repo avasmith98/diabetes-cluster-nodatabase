@@ -129,15 +129,26 @@ function App() {
     }
   };
 
-  const handleMedicationSubmit = () => {
+  const handleMedicationSubmit = async () => {
     if (isManagementChanged === 'yes' && !Object.values(futureMedications).some(checked => checked)) {
       setMedicationError('Please select at least one medication going forward.');
     } else {
       setMedicationError('');
-      console.log("Future medications selected:", futureMedications);
-      setSubmissionStatus('Medications have been saved successfully.');
+  
+      try {
+        const response = await axios.post(`${API_URL}/submit_medications`, {
+          isManagementChanged: isManagementChanged,
+          medications: futureMedications,
+        });
+  
+        setSubmissionStatus('Medications have been saved successfully.');
+      } catch (error) {
+        console.error('Error:', error);
+        setSubmissionStatus('Failed to save medications. Please try again.');
+      }
     }
   };
+  
 
   return (
     <div className="app-container">
@@ -270,7 +281,7 @@ function App() {
             </div>
           </div>
 
-          <button type="submit" className="submit-button">Predict</button>
+          <button type="submit" className="submit-button">Predict and save to database</button>
         </form>
 
         {errorMessage && (
@@ -345,7 +356,7 @@ function App() {
                   onClick={handleMedicationSubmit}
                   disabled={isManagementChanged === 'yes' && !Object.values(futureMedications).some(checked => checked)}
                 >
-                  Submit Medications
+                  Submit to database
                 </button>
                 
                 {submissionStatus && (
