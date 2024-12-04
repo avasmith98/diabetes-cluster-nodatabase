@@ -136,7 +136,14 @@ function App() {
       setMedicationError('');
   
       try {
+        // Ensure we have a prediction ID
+        if (!result || !result.predictionId) {
+          setSubmissionStatus('Failed to submit. Prediction ID is missing.');
+          return;
+        }
+  
         const response = await axios.post(`${API_URL}/submit_medications`, {
+          predictionId: result.predictionId,  // Include predictionId here
           isManagementChanged: isManagementChanged,
           medications: futureMedications,
         });
@@ -148,7 +155,6 @@ function App() {
       }
     }
   };
-  
 
   return (
     <div className="app-container">
