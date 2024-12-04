@@ -136,7 +136,7 @@ def submit_medications():
 
         # Extract data from the request
         prediction_id = data.get('predictionId')
-        is_management_changed = bool(data.get('isManagementChanged'))
+        is_management_changed = data.get('isManagementChanged')
         medications = data.get('medications', {})
 
         # Validate prediction_id
@@ -153,7 +153,12 @@ def submit_medications():
             is_management_changed = is_management_changed.lower() in ['yes', 'true', '1']
         elif not isinstance(is_management_changed, bool):
             return jsonify({'error': 'Invalid input data for "isManagementChanged".'}), 400
-        
+
+        # Handle medications based on management change status
+        if not is_management_changed:
+            # If no management change, set medications to None or an empty object to indicate no changes
+            medications = None
+
         # Save medication change to the database
         medication_change = MedicationChange(
             prediction_data_id=prediction_data.id,
@@ -164,12 +169,12 @@ def submit_medications():
         db.session.add(medication_change)
         db.session.commit()
 
-        return jsonify({'message': 'Medication changes submitted successfully.'}), 200
+        return jsonify({'message': 'Saved successfully.'}), 200
 
     except Exception as e:
         # Log and return error if any exception occurs
         print(f"Error: {e}")
-        return jsonify({'error': 'An error occurred while submitting changes.'}), 500
+        return jsonify({'error': f'An error occurred while submitting changes: {str(e)}'}), 500
 
 
 # Serve React static files

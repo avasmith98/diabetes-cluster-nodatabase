@@ -139,31 +139,36 @@ function App() {
   };
 
   const handleMedicationSubmit = async () => {
-    if (isManagementChanged === 'yes' && !Object.values(futureMedications).some(checked => checked)) {
+    if (isManagementChanged === 'yes' && !Object.values(futureMedications).some((checked) => checked)) {
       setMedicationError('Please select at least one medication going forward.');
-    } else {
-      setMedicationError('');
+      return;
+    }
   
-      try {
-        // Ensure we have a prediction ID
-        if (!result || !result.predictionId) {
-          setSubmissionStatus('Failed to submit. Prediction ID is missing.');
-          return;
-        }
+    setMedicationError('');
   
-        const response = await axios.post(`${API_URL}/submit_medications`, {
-          predictionId: result.predictionId,  // Include predictionId here
-          isManagementChanged: isManagementChanged,
-          medications: futureMedications,
-        });
-  
-        setSubmissionStatus('Saved successfully.');
-      } catch (error) {
-        console.error('Error:', error);
-        setSubmissionStatus('Failed to submit. Please try again.');
+    try {
+      // Ensure we have a prediction ID
+      if (!result || !result.predictionId) {
+        setSubmissionStatus('Failed to submit. Prediction ID is missing.');
+        return;
       }
+  
+      // Submit medications regardless of management change
+      let medicationsToSubmit = isManagementChanged === 'yes' ? futureMedications : null;
+  
+      const response = await axios.post(`${API_URL}/submit_medications`, {
+        predictionId: result.predictionId,
+        isManagementChanged: isManagementChanged,
+        medications: medicationsToSubmit,
+      });
+  
+      setSubmissionStatus('Saved successfully.');
+    } catch (error) {
+      console.error('Error:', error);
+      setSubmissionStatus('Failed to submit. Please try again.');
     }
   };
+  
 
   return (
     <div className="app-container">
