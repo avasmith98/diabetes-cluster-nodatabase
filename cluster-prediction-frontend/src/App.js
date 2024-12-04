@@ -78,11 +78,6 @@ function App() {
     setErrorMessage('');
     setResult(null);
 
-    if (!Object.values(currentMedications).some((checked) => checked)) {
-      setErrorMessage('Please select the patient\'s current medications.');
-      return;
-    }
-
     if (!inputs.gad || !inputs.hba1c || !inputs.bmi || !inputs.age || !inputs.cpeptide || !inputs.glucose) {
       setErrorMessage('All fields must be filled with valid values.');
       return;
@@ -90,6 +85,11 @@ function App() {
 
     if (!glucoseUnit || !cpeptideUnit) {
       setErrorMessage('Please select units for glucose and C-peptide.');
+      return;
+    }
+
+    if (!Object.values(currentMedications).some((checked) => checked)) {
+      setErrorMessage('Please select the patient\'s current medications.');
       return;
     }
 
@@ -112,7 +112,7 @@ function App() {
         age: parseFloat(inputs.age),
         cpeptide: cpeptideValue,
         glucose: glucoseValue,
-        medications: currentMedications,
+        medications: currentMedications, 
       };
 
       const response = await axios.post(`${API_URL}/predict`, numericInputs);

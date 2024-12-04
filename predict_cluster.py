@@ -60,7 +60,7 @@ def predict():
 
         #Extract medications from the request
         medications = data.get('medications', {})
-        selected_medications = [med for med, selected in medications.items() if selected]
+        medications_str = json.dumps(medications) if isinstance(medications, dict) else ""
 
     except (KeyError, ValueError):
         return jsonify({'error': 'Invalid input data'}), 400
@@ -112,7 +112,7 @@ def predict():
         age=age,
         cpeptide=cpeptide,
         glucose=glucose,
-        medications=medications,  
+        medications=medications_str,  
         cluster_label=cluster_label,
         probabilities=cluster_prob_rounded,
     )
