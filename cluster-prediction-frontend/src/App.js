@@ -393,7 +393,6 @@ function App() {
                   name="isManagementChanged" 
                   value="yes" 
                   onChange={() => setIsManagementChanged('yes')} 
-                  style={{ marginRight: '10px' }} 
                 />
                 Yes
               </label>
@@ -402,8 +401,7 @@ function App() {
                   type="radio" 
                   name="isManagementChanged" 
                   value="no" 
-                  onChange={() => setIsManagementChanged('no')} 
-                  style={{ marginRight: '10px' }} 
+                  onChange={() => setIsManagementChanged('no')}  
                 />
                 No
               </label>
