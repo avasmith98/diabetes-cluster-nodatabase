@@ -410,7 +410,7 @@ function App() {
               </label>
             </div>
             {(isManagementChanged === 'yes' || isManagementChanged === 'no') && (
-              <div style={{ marginTop: '20px' }}>
+              <div style={{ marginTop: '20px', textAlign: 'left'}}>
                 {isManagementChanged === 'yes' && (
                   <div>
                     <p style={{ marginRight: '10px' }}> 
