@@ -111,7 +111,7 @@ function App() {
     setResult(null);
 
     if (!Object.values(currentMedications).some((checked) => checked)) {
-      setErrorMessage('Please select the patient\'s current medications.');
+      setErrorMessage('Please select the patient\'s current medication(s).');
       return;
     }
 
@@ -228,7 +228,7 @@ function App() {
         <p style={{ marginBottom: '20px' }}>This app should not be used for monogenic forms of diabetes. This prediction model has an average sensitivity of 93% and specificity of 98%.</p>
         
         <div>
-          <label className="current-medications-label">Current Medications:</label>
+          <label className="current-medications-label">Current Medication(s):</label>
           {Object.keys(currentMedications).map((medication) => (
             <div key={medication} className={medication === 'none' ? 'last-medication-option' : ''}>
               <label className="medication-label">
@@ -413,7 +413,9 @@ function App() {
               <div style={{ marginTop: '20px' }}>
                 {isManagementChanged === 'yes' && (
                   <div>
-                    <p> <strong>Medication going forward after this visit: </strong> </p> 
+                    <p style={{ marginRight: '10px' }}> 
+                    <strong>Medication(s) going forward after this visit: </strong> 
+                    </p>  
                     {Object.keys(futureMedications).map((medication) => (
                       <div key={medication} style={{ textAlign: 'left' }}>
                         <label>
