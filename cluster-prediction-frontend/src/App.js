@@ -386,14 +386,15 @@ function App() {
             </div>
 
             {/* Display "Is this prediction going to change your management?" */}
-            <div style={{ marginTop: '20px' }}>
+            <div style={{ marginTop: '20px', textAlign: 'left' }}>
               <p><strong>Is this prediction going to change your management?</strong></p>
-              <label style={{ marginLeft: '8px' }}>
+              <label>
                 <input 
                   type="radio" 
                   name="isManagementChanged" 
                   value="yes" 
                   onChange={() => setIsManagementChanged('yes')} 
+                  style={{ marginRight: '2px' }} 
                 />
                 Yes  
               </label>
@@ -402,7 +403,8 @@ function App() {
                   type="radio" 
                   name="isManagementChanged" 
                   value="no" 
-                  onChange={() => setIsManagementChanged('no')}  
+                  onChange={() => setIsManagementChanged('no')}
+                  style={{ marginRight: '2px' }} // Add spacing  
                 />
                 No
               </label>
