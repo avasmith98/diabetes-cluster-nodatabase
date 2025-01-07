@@ -139,7 +139,7 @@ function App() {
       let cpeptideValue = parseFloat(inputs.cpeptide);
 
       if (glucoseUnit === 'mg/dL') {
-        glucoseValue = glucoseValue / 18;
+        glucoseValue = glucoseValue / 18.0182;
       }
 
       if (cpeptideUnit === 'ng/mL') {
