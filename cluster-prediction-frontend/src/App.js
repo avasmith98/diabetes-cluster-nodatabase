@@ -143,7 +143,7 @@ function App() {
       }
 
       if (cpeptideUnit === 'ng/mL') {
-        cpeptideValue = cpeptideValue * 0.333;
+        cpeptideValue = cpeptideValue * 0.3311;
       }
 
       const numericInputs = {
