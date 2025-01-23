@@ -229,9 +229,7 @@ function App() {
           <ul style={{ paddingLeft: '20px' }}>
             <li>This tool should not be used for monogenic forms of diabetes.</li>
             <li>By the end of the form, you will have clicked two blue "Save to Database" buttons.</li>
-            <li>If you need to correct an entry or have questions, please contact:&nbsp;
-              <a href="mailto:anmichl@uabmc.edu">anmichl@uabmc.edu</a>.
-            </li>
+            <li>If you need to correct an entry, please contact:&nbsp; <a href="mailto:anmichl@uabmc.edu">anmichl@uabmc.edu</a>.</li>
             <li>The model has an average sensitivity of 93% and specificity of 98%.</li>
           </ul> 
         </p>
@@ -252,7 +250,7 @@ function App() {
           ))}
         </div>
 
-        <p style={{ marginBottom: '20px' }}>Next, please enter all values as recorded at the time or closest to the patient’s <b>  initial diabetes diagnosis </b> .</p>
+        <p style={{ marginBottom: '20px' }}>Next, please enter all values as recorded at the time or closest to the patient’s <b> initial diabetes diagnosis </b>.</p>
         
         <form onSubmit={handleSubmit} className="prediction-form">
           <div className="input-group">
