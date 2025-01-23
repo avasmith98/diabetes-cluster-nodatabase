@@ -225,8 +225,16 @@ function App() {
     <div className="app-container">
       <div className="form-container">
         <h2>Diabetes Cluster Prediction</h2>
-        <p style={{ marginBottom: '20px' }}>This app should not be used for monogenic forms of diabetes. This prediction model has an average sensitivity of 93% and specificity of 98%.</p>
-        
+        <p style={{ marginBottom: '20px' }}>
+          <ul style={{ paddingLeft: '20px' }}>
+            <li>This tool should not be used for monogenic forms of diabetes.</li>
+            <li>By the end of the form, you will have clicked two blue "Save to Database" buttons.</li>
+            <li>If you need to correct an entry or have questions, please contact:&nbsp;
+              <a href="mailto:anmichl@uabmc.edu">anmichl@uabmc.edu</a>.
+            </li>
+            <li>The model has an average sensitivity of 93% and specificity of 98%.</li>
+          </ul> 
+        </p>
         <div>
           <label className="current-medications-label">Current Medication(s):</label>
           {Object.keys(currentMedications).map((medication) => (
@@ -244,7 +252,7 @@ function App() {
           ))}
         </div>
 
-        <p style={{ marginBottom: '20px' }}>Next, please enter all values as recorded at the time or closest to the patient’s initial diabetes diagnosis.</p>
+        <p style={{ marginBottom: '20px' }}>Next, please enter all values as recorded at the time or closest to the patient’s <b>  initial diabetes diagnosis </b> .</p>
         
         <form onSubmit={handleSubmit} className="prediction-form">
           <div className="input-group">
@@ -387,7 +395,7 @@ function App() {
 
             {/* Display "Is this prediction going to change your management?" */}
             <div style={{ marginTop: '20px', textAlign: 'left' }}>
-              <p><strong>Is this prediction going to change your management?</strong></p>
+              <p><strong> Is this prediction going to change your management?</strong></p>
               <label>
                 <input 
                   type="radio" 
