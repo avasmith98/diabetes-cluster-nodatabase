@@ -153,7 +153,7 @@ function App() {
         cpeptideValue = cpeptideValue * 0.3311;
       }
 
-      const numericInputs = {
+      const someInputs = {
         gad: inputs.gad === 'Positive' ? 1 : 0,
         hba1c: parseFloat(inputs.hba1c),
         bmi: parseFloat(inputs.bmi),
@@ -161,10 +161,11 @@ function App() {
         cpeptide: cpeptideValue,
         glucose: glucoseValue,
         medications: currentMedications, 
+        isVerified: isVerified
       };
 
       // Send the request to the prediction endpoint  
-      const response = await axios.post(`${API_URL}/predict`, numericInputs);
+      const response = await axios.post(`${API_URL}/predict`, someInputs);
       
       // Check if we have a successful response and handle it
       if (response.data) {
@@ -388,7 +389,7 @@ function App() {
         )}
         
         <p style={{ marginBottom: '20px' }}>
-        After predicting the cluster, please continue to scroll all the way down and complete the remainder of the form.
+        After predicting the cluster, please continue to scroll all the way down and complete the remainder of the form. 
         </p>
 
         {result && (
