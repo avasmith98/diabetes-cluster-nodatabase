@@ -6,7 +6,8 @@ function CollapsibleReferences({ references }) {
   const [isOpen, setIsOpen] = React.useState(false);
 
   return (
-    <div style={{ marginTop: '10px', fontSize: '0.85em' }}>
+    <div style={{ marginTop: '20px', textAlign: 'center' }}>
+      {/* Centered button */}
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
@@ -14,23 +15,31 @@ function CollapsibleReferences({ references }) {
           background: '#007bff',
           color: 'white',
           border: 'none',
-          padding: '5px 10px',
+          padding: '6px 12px',
           borderRadius: '5px',
           cursor: 'pointer',
-          marginBottom: '5px'
+          marginBottom: '10px'
         }}
       >
         {isOpen ? 'Hide References' : 'Show References'}
       </button>
 
       {isOpen && (
-        <ol style={{ paddingLeft: '20px', marginTop: '10px' }}>
-          {references.map((ref, index) => (
-            <li key={index} style={{ marginBottom: '8px' }}>
-              {ref}
-            </li>
-          ))}
-        </ol>
+        <div style={{ display: 'flex', justifyContent: 'center' }}>
+          <ol
+            style={{
+              textAlign: 'left',      // ✅ Each reference text is left-aligned
+              maxWidth: '600px',      // Optional: limit width for better readability
+              paddingLeft: '20px'
+            }}
+          >
+            {references.map((ref, index) => (
+              <li key={index} style={{ marginBottom: '8px' }}>
+                {ref}
+              </li>
+            ))}
+          </ol>
+        </div>
       )}
     </div>
   );
